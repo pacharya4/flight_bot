@@ -1,0 +1,45 @@
+# BETA - remove if github action processes successfuly
+# Test Run the bot to start up with no exceptions.
+
+name: Telegram Bot Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    env:
+      BOT_USERNAME: ${{secrets.BOT_USERNAME}}
+      BOT_TOKEN: ${{secrets.BOT_TOKEN}}
+      FIRST_RUN_FS: ${{secrets.FIRST_RUN_FS}}
+      JOB_INTERVAL_FS: ${{secrets.JOB_INTERVAL_FS}}
+      FT_LIMIT: ${{secrets.FT_LIMIT}}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{matrix.python-version}}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ./requirements.txt
+
+      - name: Test Bot Code
+        run: |
+          python ./bot.py
+          python -m telegram.ext.updater.stop()
